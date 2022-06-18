@@ -1,2 +1,2 @@
-# eecs_hw
-eecs
+# MiniProject3
+MiniProject3
