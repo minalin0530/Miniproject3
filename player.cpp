@@ -28,7 +28,7 @@ vector<position> whity;
 set<position> possible_new_me;
 int horizontal[15][15], vertical[15][15], right_up[15][15], left_up[15][15];
 int position_score[15][15];
-
+position max_position(7, 7);
 
 
 void record_position(int id, int i, int j){
@@ -44,6 +44,7 @@ void record_position(int id, int i, int j){
 
 void statefunction(int id){
     int appear, flag;
+    int max_score = INT_MIN;
     for(auto c: (id == 1?blacky:whity)){
         appear = 0;
         for(int i = -4; i <= 4; i++){
@@ -59,6 +60,11 @@ void statefunction(int id){
                 if(flag){
                     for(int j = 0; j < 5; j++){
                         position_score[c.row][c.column+i+j] += score;
+                        if(position_score[c.row][c.column+i+j] > max_score) {
+                            max_score = position_score[c.row][c.column+i+j];
+                            max_position.row = c.row;
+                            max_position.column = c.column;
+                        }
                         possible_new_me.insert(position(c.row, c.column+i+j));
                     }
                 }
@@ -75,6 +81,11 @@ void statefunction(int id){
                 if(flag){
                     for(int j = 0; j < 5; j++){
                         position_score[c.row+i+j][c.column] += score;
+                        if(position_score[c.row][c.column+i+j] > max_score) {
+                            max_score = position_score[c.row][c.column+i+j];
+                            max_position.row = c.row;
+                            max_position.column = c.column;
+                        }
                         possible_new_me.insert(position(c.row+i+j, c.column));
                     }
                 }
@@ -91,6 +102,11 @@ void statefunction(int id){
                 if(flag){
                     for(int j = 0; j < 5; j++){
                         position_score[c.row+i+j][c.column+i+j] += score;
+                        if(position_score[c.row][c.column+i+j] > max_score) {
+                            max_score = position_score[c.row][c.column+i+j];
+                            max_position.row = c.row;
+                            max_position.column = c.column;
+                        }
                         possible_new_me.insert(position(c.row+i+j, c.column+i+j));
                     }
                 }
@@ -108,6 +124,11 @@ void statefunction(int id){
                 if(flag){
                     for(int j = 0; j < 5; j++){
                         position_score[c.row+i+j][c.column-i-j] += score;
+                        if(position_score[c.row][c.column+i+j] > max_score) {
+                            max_score = position_score[c.row][c.column+i+j];
+                            max_position.row = c.row;
+                            max_position.column = c.column;
+                        }
                         possible_new_me.insert(position(c.row+i+j, c.column-i-j));
                     }
                 }
@@ -137,8 +158,8 @@ void write_valid_spot(std::ofstream& fout) {
     // Keep updating the output until getting killed.
     while(true) {
         // Choose a random spot.
-        int x = (rand() % SIZE);
-        int y = (rand() % SIZE);
+        int x = max_position.row;
+        int y = max_position.column;
         if (board[x][y] == EMPTY) {
             fout << x << " " << y << std::endl;
             // Remember to flush the output to ensure the last action is written to file.
