@@ -6,7 +6,6 @@
 #include <vector>
 #include <set>
 #include <climits>
-#define score 20
 
 using namespace std;
 enum SPOT_STATE {
@@ -40,19 +39,18 @@ int give_score(int id, int count){
         if(count == 1) return 10;
         else if(count == 2) return 20;
         else if(count == 3) return 50;
-        else if(count ==4) return 1000;
+        else if(count == 4) return 1000;
     }
     else{
         if(count == 1) return 10;
         else if(count == 2) return 25;
         else if(count == 3) return 500;
-        else if(count ==4) return 5000;
+        else if(count == 4) return 5000;
     }
 }
 
 int calculate(void){
     int flag, max_score = INT_MIN, count;
-    int id = player;
     for(auto c: all){
         for(int i = -4; i <= 0; i++){
             if(c.column+i >= 0 && c.column+i < 11) {
@@ -235,7 +233,7 @@ void read_board(std::ifstream& fin) {
     for (int i = 0; i < SIZE; i++) {
         for (int j = 0; j < SIZE; j++) {
             fin >> board[i][j];
-            all.push_back(position(i, j));
+            if(board[i][j] != 0) all.push_back(position(i, j));
         }
     }
     scoring = statefunction(player, 0);

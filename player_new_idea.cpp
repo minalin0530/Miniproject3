@@ -33,195 +33,270 @@ struct cmp{
 vector<position> all;
 int position_score[15][15];
 position max_position(7, 7);
+set<int> row, column, left_up, right_up;
 
-int give_score(int id, int count){
-    if(id == player){
-        if(count == 1) return 10;
-        else if(count == 2) return 20;
-        else if(count == 3) return 50;
-        else if(count == 4) return 1000;
-    }
-    else{
-        if(count == 1) return 10;
-        else if(count == 2) return 25;
-        else if(count == 3) return 500;
-        else if(count == 4) return 5000;
-    }
+int evaluate(int repeat, int alive){
+    if(repeat == 2) return (alive == 0)?0:1;
+    else if(repeat == 3) return (alive == 0)?2:3;
+    else if (repeat == 4) return (alive == 0)?4:5;
+    else if (repeat == 5) return 6;
+    else return 8;
 }
 
 int calculate(void){
-    int flag, max_score = INT_MIN, count;
-    for(auto c: all){
-        for(int i = -4; i <= 0; i++){
-            if(c.column+i >= 0 && c.column+i < 11) {
-                flag = 1;
-                count = 0;
-                for(int j = 0; j < 5; j++){
-                    if(board[c.row][c.column+i+j] + board[c.row][c.column] == 3){
-                        flag = 0;
-                        break;
-                    }
-                    else if(board[c.row][c.column+i+j] != 0) count++;
-                }
-                if(flag){
-                    for(int j = 0; j < 5; j++){
-                        position_score[c.row][c.column+i+j] += give_score(board[c.row][c.column], count);
-                        if(position_score[c.row][c.column+i+j] > max_score && board[c.row][c.column+i+j] == 0) {
-                            max_score = position_score[c.row][c.column+i+j];
-                        }
-                    }
-                }
-            }
-            if(c.row+i >= 0 && c.row+i < 11) {
-                flag = 1; 
-                count = 0;
-                for(int j = 0; j < 5; j++){
-                    if(board[c.row+i+j][c.column] + board[c.row][c.column] == 3){
-                        flag = 0;
-                        break;
-                    }
-                    else if(board[c.row+i+j][c.column] != 0) count++;
-                }
-                if(flag){
-                    for(int j = 0; j < 5; j++){
-                        position_score[c.row+i+j][c.column] += give_score(board[c.row][c.column], count);
-                        if(position_score[c.row+i+j][c.column] > max_score && board[c.row+i+j][c.column] == 0) {
-                            max_score = position_score[c.row+i+j][c.column];
-                        }
-                    }
-                }
-            }
-            if(c.row+i >= 0 && c.row+i < 11 && c.column +i >= 0 && c.column+i < 11){
-                flag = 1;
-                count = 0;
-                for(int j = 0; j < 5; j++){
-                    if(board[c.row+i+j][c.column+i+j] + board[c.row][c.column] == 3){
-                        flag = 0;
-                        break;
-                    }
-                    else if(board[c.row+i+j][c.column+i+j] != 0) count++;
-                }
-                if(flag){
-                    for(int j = 0; j < 5; j++){
-                        position_score[c.row+i+j][c.column+i+j] += give_score(board[c.row][c.column], count);
-                        if(position_score[c.row+i+j][c.column+i+j] > max_score && board[c.row+i+j][c.column+i+j] == 0) {
-                            max_score = position_score[c.row+i+j][c.column+i+j];
-                        }
-                    }
-                }
+    int max_score = 0;
+    int my_key[10] = {0}, opponent_key[10] = {0};
+    int i, j;
 
-            } 
-            if(c.row+i >= 0 && c.row+i < 11 && c.column-i >= 4 && c.column-i < 15) {
-                flag = 1;
-                count = 0;
-                for(int j = 0; j < 5; j++){
-                    if(board[c.row+i+j][c.column-i-j] + board[c.row][c.column] == 3){
-                        flag = 0;
-                        break;
-                    }
-                    else if(board[c.row+i+j][c.column-i-j] != 0) count++;
+    //horizontal
+    for(auto c: row){
+        for(i = 0; i < 15; i++){
+            if(board[c][i] == player){
+                for(j = 1; j <= 4; j++){
+                    if(i+j >= 15) break;
+                    if(board[c][i+j] != player) break;
                 }
-                if(flag){
-                    for(int j = 0; j < 5; j++){
-                        position_score[c.row+i+j][c.column-i-j] += give_score(board[c.row][c.column], count);
-                        if(position_score[c.row+i+j][c.column-i-j] > max_score && board[c.row+i+j][c.column-i-j] == 0) {
-                            max_score = position_score[c.row+i+j][c.column-i-j];
-                        }
-                    }
+                if(j == 5) my_key[6]++;
+                else{
+                    if(i-1 < 0){
+                        if(board[c][i+j] != (3-player)) my_key[evaluate(j, 0)]++;}
+                    else if(i+j >= 15){
+                        if(board[c][i-1] != (3-player)) my_key[evaluate(j, 0)]++;}
+                    else if(board[c][i-1] == 0 && board[c][i+j] == 0){
+                        my_key[evaluate(j, 1)]++;}
+                    else if(board[c][i-1] != (3-player) || board[c][i+j] != (3-player)){
+                        my_key[evaluate(j, 0)]++;}
                 }
+                i = i + j - 1;
+            }
+            else if(board[c][i] != 0){
+                for(j = 1; j <= 4; j++){
+                    if(i+j >= 15) break;
+                    if(board[c][i+j] != (3-player)) break;
+                }
+                if(j == 5) opponent_key[6]++;
+                else{
+                    if(i-1 < 0)
+                        if(board[c][i+j] != player) opponent_key[evaluate(j, 0)]++;
+                    else if(i+j >= 15)
+                        if(board[c][i-1] != player) opponent_key[evaluate(j, 0)]++;
+                    else if(board[c][i-1] == 0 && board[c][i+j] == 0){
+                        opponent_key[evaluate(j, 1)]++;}
+                    else if(board[c][i-1] != player || board[c][i+j] != player)
+                        opponent_key[evaluate(j, 0)]++;
+                }
+                i = i + j - 1;
             }
         }
     }
+    //vertical
+    for(auto c: column){
+        for(i = 0; i < 15; i++){
+            if(board[i][c] == player){
+                for(j = 1; j <= 4; j++){
+                    if(i+j >= 15) break;
+                    if(board[i+j][c] != player) break;
+                }
+                if(j == 5)  my_key[6]++;
+                else{
+                    if(i-1 < 0)
+                        if(board[i+j][c] != (3-player)) my_key[evaluate(j, 0)]++;
+                    else if(i+j >= 15)
+                        if(board[i-1][c] != (3-player)) my_key[evaluate(j, 0)]++;
+                    else if(board[i-1][c] == 0 && board[i+j][c] == 0)
+                        my_key[evaluate(j, 1)]++;
+                    else if(board[i-1][c] != (3-player) || board[i+j][c] != (3-player))
+                        my_key[evaluate(j, 0)]++;
+                }
+                i = i + j - 1;
+            }
+            else if(board[i][c] != 0){
+                for(j = 1; j <= 4; j++){
+                    if(i+j >= 15) break;
+                    if(board[i+j][c] != (3-player)) break;
+                }
+                if(j == 5) opponent_key[6]++;
+                else{
+                    if(i-1 < 0)
+                        if(board[i+j][c] != player) opponent_key[evaluate(j, 0)]++;
+                    else if(i+j >= 15)
+                        if(board[i-1][c] != player) opponent_key[evaluate(j, 0)]++;
+                    else if(board[i-1][c] == 0 && board[i+j][c] == 0)
+                        opponent_key[evaluate(j, 1)]++;
+                    else if(board[i-1][c] != player || board[i+j][c] != player)
+                        opponent_key[evaluate(j, 0)]++;
+                }
+                i = i + j - 1;
+            }
+        }
+    }
+    //right_up
+    for(auto c: right_up){
+        if(c < 4) continue;
+        if(c > 26) break;
+        for(i = 0; i < 15; i++){
+            if(c-i < 0) break;
+            if(board[i][c-i] == player){
+                for(j = 1; j <= 4; j++){
+                    if(i+j >= 15 || c-i-j < 0) break;
+                    if(board[i+j][c-i-j] != player) break;
+                }
+                if(j == 5) my_key[6]++;
+                else{
+                    if(i-1 < 0)
+                        if(board[i+j][c-i-j] != (3-player)) my_key[evaluate(j, 0)]++;
+                    else if(c-i+1 >= 15)
+                        if(board[i+j][c-i-j] != (3-player)) my_key[evaluate(j, 0)]++;
+                    else if(i+j >= 15)
+                        if(board[i-1][c-i+1] != (3-player)) my_key[evaluate(j, 0)]++;
+                    else if(c-i-j < 0)
+                        if(board[i-1][c-i+1] != (3-player)) my_key[evaluate(j, 0)]++;
+                    else if(board[i-1][c-i+1] == 0 && board[i+j][c-i-j] == 0)
+                        my_key[evaluate(j, 1)]++;
+                    else if(board[i-1][c-i+1] == 0 || board[i+j][c-i-j] == 0)
+                        my_key[evaluate(j, 0)]++;
+                }
+                i = i + j - 1;
+            }
+            else if(board[i][c-i] != 0){
+                for(j = 1; j <= 4; j++){
+                    if(i+j >= 15 || c-i-j < 0) break;
+                    if(board[i+j][c-i-j] != (3-player)) break;
+                }
+                if(j == 5) opponent_key[6]++;
+                else{
+                    if(i-1 < 0){
+                        if(board[i+j][c-i-j] != player) opponent_key[evaluate(j, 0)]++;}
+                    else if(c-i+1 >= 15){
+                        if(board[i+j][c-i-j] != player) opponent_key[evaluate(j, 0)]++;}
+                    else if(i+j >= 15){
+                        if(board[i-1][c-i+1] != player) opponent_key[evaluate(j, 0)]++;}
+                    else if(c-i-j < 0){
+                        if(board[i-1][c-i+1] != player) opponent_key[evaluate(j, 0)]++;}
+                    else if(board[i-1][c-i+1] == 0 && board[i+j][c-i-j] == 0){
+                        opponent_key[evaluate(j, 1)]++;}
+                    else if(board[i-1][c-i+1] == 0 || board[i+j][c-i-j] == 0){
+                        opponent_key[evaluate(j, 0)]++;}
+                }
+                i = i + j - 1;
+            }
+        }
+    }
+    //left_up
+    for(auto c: left_up){
+        if(c < 4) continue;
+        if(c > 26) break;
+        for(i = 0; i < 15; i++){
+            if(14-c+i >= 15 || 14-c+i < 0) break;
+            if(board[i][14-c+i] == player){
+                for(j = 1; j <= 4; j++){
+                    if(i+j>= 15 || 14-c+i+j >= 15) break;
+                    if(board[i+j][14-c+i+j] != player) break;
+                }
+                if(j == 5) my_key[6]++;
+                else{
+                    if(i-1 < 0){
+                        if(board[i+j][14-c+i+j] != (3-player)) my_key[evaluate(j, 0)]++;}
+                    else if(14-c+i+j >= 15){
+                        if(board[i-1][14-c+i-1] != (3-player)) my_key[evaluate(j, 0)]++;}
+                    else if(i+j >= 15){
+                        if(board[i-1][14-c+i-1] != (3-player)) my_key[evaluate(j, 0)]++;}
+                    else if(14-c+i-1 < 0){
+                        if(board[i+j][14-c+i+j] != (3-player)) my_key[evaluate(j, 0)]++;}
+                    else if(board[i-1][14-c+i-1] == 0 && board[i+j][14-c+i+j] == 0){
+                        my_key[evaluate(j, 1)]++;}
+                    else if(board[i-1][14-c+i-1] == 0 || board[i+j][14-c+i+j] == 0){
+                        my_key[evaluate(j, 0)]++;}    
+                } 
+                i = i + j - 1;
+            }
+            else if(board[i][14-c+i] != 0){
+                for(j = 1; j <= 4; j++){
+                    if(i+j >= 15 || 14-c+i+j >= 15) break;
+                    if(board[i+j][14-c+i+j] != (3-player)) break;
+                }
+                if(j == 5) opponent_key[6]++;
+                else{
+                    if(i-1 < 0){
+                        if(board[i+j][14-c+i+j] != player) opponent_key[evaluate(j, 0)]++;
+                    }
+                    else if(14-c+i+j >= 15){
+                        if(board[i-1][14-c+i-1] != player) opponent_key[evaluate(j, 0)]++;}
+                    else if(i+j >= 15){
+                        if(board[i-1][14-c+i-1] != player) opponent_key[evaluate(j, 0)]++;}
+                    else if(14-c+i-1 < 0){
+                        if(board[i+j][14-c+i+j] != player) opponent_key[evaluate(j, 0)]++;}
+                    else if(board[i-1][14-c+i-1] == 0 && board[i+j][14-c+i+j] == 0){
+                        opponent_key[evaluate(j, 1)]++;}  
+                    else if(board[i-1][14-c+i-1] == 0 || board[i+j][14-c+i-1] == 0){
+                        opponent_key[evaluate(j, 0)]++;}    
+                }
+                i = i + j - 1;
+            }
+        }
+    }
+    max_score = 10*my_key[0]+ 100*my_key[1] + 1000*my_key[2] + 3000*my_key[3] + 8000*my_key[4] + 50000*my_key[5] + 200000*my_key[6];
+    max_score -= (10*opponent_key[0] + 1000*opponent_key[1] + 1000*opponent_key[2]+ 50000*opponent_key[3]+10000*opponent_key[4] + 80000*opponent_key[5] + 100000*opponent_key[6]);  
+    //cout << my_key[0] << my_key[1] << my_key[2] << my_key[3] << my_key[4] << "  "  << opponent_key[0] << opponent_key[1] << opponent_key[2] << opponent_key[3] << opponent_key[4] << endl;
     return max_score;
 }
 
 int statefunction(int id, int depth){
     set<position, cmp> possible_new_me;
     int final_score;
-    if(id == player && depth != 0) final_score = INT_MAX;
+    if(id != player) final_score = INT_MAX;
     else final_score = INT_MIN;
-    if(depth == 3) return(calculate());
+    if(depth == 2) return(calculate());
     int flag;
     for(auto c: all){
-        for(int i = -4; i <= 0; i++){
-            if(c.column+i >= 0 && c.column+i < 11) {
-                flag = 1;
-                for(int j = 0; j < 5; j++){
-                    if(board[c.row][c.column+i+j]+board[c.row][c.column] == 3){
-                        flag = 0;
-                        break;
-                    }
-                }
-                if(flag){
-                    for(int j = 0; j < 5; j++){
-                        if(board[c.row][c.column+i+j] == 0) 
-                            possible_new_me.insert(position(c.row, c.column+i+j));
-                    }
-                }
+        for(int i = -4; i <= 4; i++){ //有時間再修正
+            if(c.column+i >= 0 && c.column+i < 15) {
+                if(board[c.row][c.column+i] == 0) 
+                    possible_new_me.insert(position(c.row, c.column+i));
             }
-            if(c.row+i >= 0 && c.row+i < 11) {
-                flag = 1;
-                for(int j = 0; j < 5; j++){
-                    if(board[c.row+i+j][c.column] + board[c.row][c.column] == 3){
-                        flag = 0;
-                        break;
-                    }
-                }
-                if(flag){
-                    for(int j = 0; j < 5; j++){
-                        if(board[c.row+i+j][c.column] == 0) 
-                            possible_new_me.insert(position(c.row+i+j, c.column));
-                    }
-                }
+            if(c.row+i >= 0 && c.row+i < 15) {
+                if(board[c.row+i][c.column] == 0) 
+                    possible_new_me.insert(position(c.row+i, c.column));
             }
-            if(c.row+i >= 0 && c.row+i < 11 && c.column +i >= 0 && c.column+i < 11){
-                flag = 1;
-                for(int j = 1; j < 5; j++){
-                    if(board[c.row+i+j][c.column+i+j] + board[c.row][c.column] == 3){
-                        flag = 0;
-                        break;
-                    }
-                }
-                if(flag){
-                    for(int j = 0; j < 5; j++){
-                        if(board[c.row+i+j][c.column+i+j] == 0)
-                            possible_new_me.insert(position(c.row+i+j, c.column+i+j));
-                    }
-                }
-
+            if(c.row+i >= 0 && c.row+i < 15 && c.column +i >= 0 && c.column+i < 15){
+                if(board[c.row+i][c.column+i] == 0)
+                    possible_new_me.insert(position(c.row+i, c.column+i));
             } 
-            if(c.row+i >= 0 && c.row+i < 11 && c.column-i >= 4 && c.column-i < 15) {
-                flag = 1;
-                for(int j = 0; j < 5; j++){
-                    if(board[c.row+i+j][c.column-i-j] + board[c.row][c.column] == 3){
-                        flag = 0;
-                        break;
-                    }
-                }
-                if(flag){
-                    for(int j = 0; j < 5; j++){
-                        if(board[c.row+i+j][c.column-i-j] == 0) 
-                            possible_new_me.insert(position(c.row+i+j, c.column-i-j));
-                    }
-                }
+            if(c.row+i >= 0 && c.row+i < 15 && c.column-i >= 0 && c.column-i < 15) {
+                if(board[c.row+i][c.column-i] == 0) 
+                    possible_new_me.insert(position(c.row+i, c.column-i));
             }
         }
     }
     for(auto c: possible_new_me){
         all.push_back(c);
+        row.insert(c.row);
+        column.insert(c.column);
+        right_up.insert(c.row+c.column);
+        left_up.insert(14-(c.column-c.row));
+        //if(depth == 0)cout << c.row << " " << c.column << endl;
         board[c.row][c.column] = id;
-        if(id == player && depth != 0) final_score = min(statefunction(3-id, depth+1), final_score);
+        if(id != player) {
+            int here = statefunction(3-id, depth+1); 
+            //cout << "2:: "<< c.row << " " << c.column << " " << here << endl;
+            if(here < final_score){
+                final_score = here;
+                //cout << "2:: "<< c.row << " " << c.column << " " << final_score << endl;
+            }
+        }
         else {
             int here = statefunction(3-id, depth+1); 
-            if(here > final_score){
+            //cout << c.row << " " << c.column << " " << here << endl;
+            if(here >= final_score){
                 final_score = here;
                 if(depth == 0){
+                    //cout << c.row << " " << c.column << " " << final_score << endl;
                     max_position.row = c.row;
                     max_position.column = c.column;
                 } 
             }
         }
-        all.pop_back();   
+        all.pop_back();
         board[c.row][c.column] = 0;
     }
     return final_score;
@@ -233,7 +308,13 @@ void read_board(std::ifstream& fin) {
     for (int i = 0; i < SIZE; i++) {
         for (int j = 0; j < SIZE; j++) {
             fin >> board[i][j];
-            if(board[i][j] != 0) all.push_back(position(i, j));
+            if(board[i][j] != 0) {
+                row.insert(i);
+                column.insert(j);
+                right_up.insert(i+j);
+                left_up.insert(14-(j-i));
+                all.push_back(position(i, j));
+            }
         }
     }
     scoring = statefunction(player, 0);
@@ -242,7 +323,6 @@ void read_board(std::ifstream& fin) {
 void write_valid_spot(std::ofstream& fout) {
     srand(time(NULL));
     int x, y;
-    // Keep updating the output until getting killed.
     x = max_position.row;
     y = max_position.column;
 
