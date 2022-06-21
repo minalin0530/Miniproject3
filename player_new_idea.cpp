@@ -6,7 +6,7 @@
 #include <vector>
 #include <set>
 #include <climits>
-//high winning chance baseline1
+
 using namespace std;
 enum SPOT_STATE {
     EMPTY = 0,
@@ -186,7 +186,8 @@ int calculate(void){
         if(c < 4) continue;
         if(c > 26) break;
         for(i = 0; i < 15; i++){
-            if(14-c+i >= 15 || 14-c+i < 0) break;
+            if(14-c+i >= 15) break;
+            else if(14-c+i < 0) continue;
             if(board[i][14-c+i] == player){
                 for(j = 1; j <= 4; j++){
                     if(i+j>= 15 || 14-c+i+j >= 15) break;
@@ -225,6 +226,7 @@ int calculate(void){
                     else if(14-c+i-1 < 0){
                         if(board[i+j][14-c+i+j] != player) opponent_key[evaluate(j, 0)]++;}
                     else if(board[i-1][14-c+i-1] == 0 && board[i+j][14-c+i+j] == 0){
+                        //cout << "leftup" << j << endl;
                         opponent_key[evaluate(j, 1)]++;}  
                     else if(board[i-1][14-c+i-1] == 0 || board[i+j][14-c+i+j] == 0){
                         opponent_key[evaluate(j, 0)]++;}    
@@ -232,63 +234,103 @@ int calculate(void){
             }
         }
     }
-    max_score = 10*my_key[0]+ 100*my_key[1] + 1000*my_key[2] + 5000*my_key[3] + 8000*my_key[4] + 50000*my_key[5] + 200000*my_key[6];
-    max_score -= (10*opponent_key[0] + 1000*opponent_key[1] + 1000*opponent_key[2]+ 10000*opponent_key[3]+10000*opponent_key[4] + 50000*opponent_key[5] + 100000*opponent_key[6]);  
+    if(player == 2){
+        max_score = 10*my_key[0]+ 100*my_key[1] + 1000*my_key[2] + 5000*my_key[3] + 8000*my_key[4] + 50000*my_key[5] + 100000*my_key[6];
+        max_score -= (10*opponent_key[0] + 1000*opponent_key[1] + 1000*opponent_key[2]+ 50000*opponent_key[3]+50000*opponent_key[4] + 150000*opponent_key[5] + 200000*opponent_key[6]);  
+    }
+    else{
+        max_score = 10*my_key[0]+ 100*my_key[1] + 1000*my_key[2] + 5000*my_key[3] + 8000*my_key[4] + 50000*my_key[5] + 130000*my_key[6];
+        max_score -= (10*opponent_key[0] + 1000*opponent_key[1] + 1000*opponent_key[2]+ 10000*opponent_key[3]+200000*opponent_key[4] + 250000*opponent_key[5] + 300000*opponent_key[6]);  
+    }
     //cout << my_key[0] << my_key[1] << my_key[2] << my_key[3] << my_key[4] << "  "  << opponent_key[0] << opponent_key[1] << opponent_key[2] << opponent_key[3] << opponent_key[4] << endl;
     return max_score;
 }
 
-int statefunction(int id, int depth){
+int statefunction(int id, int depth, int alpha_val, int beta_val){
     set<position, cmp> possible_new_me;
-    int final_score;
+    int final_score, here;
     if(id != player) final_score = INT_MAX;
     else final_score = INT_MIN;
     if(depth == 3) return(calculate());
     int flag;
     for(auto c: all){
-        for(int i = -2; i <= 2; i++){ //有時間再修正
-            if(c.column+i >= 0 && c.column+i < 15) {
-                if(board[c.row][c.column+i] == 0) 
-                    possible_new_me.insert(position(c.row, c.column+i));
+        if(all.size() <= 40){
+            for(int i = -2; i <= 2; i++){ //有時間再修正    
+                if(c.column+i >= 0 && c.column+i < 15) {
+                    if(board[c.row][c.column+i] == 0) 
+                        possible_new_me.insert(position(c.row, c.column+i));
+                }
+                if(c.row+i >= 0 && c.row+i < 15) {
+                    if(board[c.row+i][c.column] == 0) 
+                        possible_new_me.insert(position(c.row+i, c.column));
+                }
+                if(c.row+i >= 0 && c.row+i < 15 && c.column +i >= 0 && c.column+i < 15){
+                    if(board[c.row+i][c.column+i] == 0)
+                        possible_new_me.insert(position(c.row+i, c.column+i));
+                } 
+                if(c.row+i >= 0 && c.row+i < 15 && c.column-i >= 0 && c.column-i < 15) {
+                    if(board[c.row+i][c.column-i] == 0) 
+                        possible_new_me.insert(position(c.row+i, c.column-i));
+                }
             }
-            if(c.row+i >= 0 && c.row+i < 15) {
-                if(board[c.row+i][c.column] == 0) 
-                    possible_new_me.insert(position(c.row+i, c.column));
-            }
-            if(c.row+i >= 0 && c.row+i < 15 && c.column +i >= 0 && c.column+i < 15){
-                if(board[c.row+i][c.column+i] == 0)
-                    possible_new_me.insert(position(c.row+i, c.column+i));
-            } 
-            if(c.row+i >= 0 && c.row+i < 15 && c.column-i >= 0 && c.column-i < 15) {
-                if(board[c.row+i][c.column-i] == 0) 
-                    possible_new_me.insert(position(c.row+i, c.column-i));
-            }
+        }
+        else{
+            for(int i = -1; i <= 1; i++){ //有時間再修正    
+                if(c.column+i >= 0 && c.column+i < 15) {
+                    if(board[c.row][c.column+i] == 0) 
+                        possible_new_me.insert(position(c.row, c.column+i));
+                }
+                if(c.row+i >= 0 && c.row+i < 15) {
+                    if(board[c.row+i][c.column] == 0) 
+                        possible_new_me.insert(position(c.row+i, c.column));
+                }
+                if(c.row+i >= 0 && c.row+i < 15 && c.column +i >= 0 && c.column+i < 15){
+                    if(board[c.row+i][c.column+i] == 0)
+                        possible_new_me.insert(position(c.row+i, c.column+i));
+                } 
+                if(c.row+i >= 0 && c.row+i < 15 && c.column-i >= 0 && c.column-i < 15) {
+                    if(board[c.row+i][c.column-i] == 0) 
+                        possible_new_me.insert(position(c.row+i, c.column-i));
+                }
+            }    
         }
     }
     for(auto c: possible_new_me){
         all.push_back(c);
-        //row.insert(c.row);
-        //column.insert(c.column);
-        //right_up.insert(c.row+c.column);
-        //left_up.insert(14-(c.column-c.row));
+        /*row.insert(c.row);
+        column.insert(c.column);
+        right_up.insert(c.row+c.column);
+        left_up.insert(14-(c.column-c.row));*/
         board[c.row][c.column] = id;
-        int here = statefunction(3-id, depth+1); 
+        here = statefunction(3-id, depth+1, alpha_val, beta_val); 
+        //cout << depth << ": " << alpha_val << " " << beta_val << endl;
         if(id != player) {
             //cout << "2:: "<< c.row << " " << c.column << " " << here << endl;
             if(here < final_score){
                 final_score = here;
-                //cout << "2:: "<< c.row << " " << c.column << " " << final_score << endl;
+            }
+            if(final_score < beta_val) beta_val = final_score;
+            if(beta_val <= alpha_val) {
+                all.pop_back();
+                board[c.row][c.column] = 0;
+                break;
             }
         }
         else {
-            //cout << c.row << " " << c.column << " " << here << endl;
-            if(here >= final_score){
+            //if(depth == 0) cout << c.row << " " << c.column << " " << here << endl;
+            if(here > final_score){
                 final_score = here;
                 if(depth == 0){
                     //cout << c.row << " " << c.column << " " << final_score << endl;
                     max_position.row = c.row;
                     max_position.column = c.column;
                 } 
+            }
+            if(final_score > alpha_val) alpha_val = final_score;
+            if(alpha_val >= beta_val){
+                all.pop_back();
+                board[c.row][c.column] = 0;    
+                break;
             }
         }
         all.pop_back();
@@ -312,7 +354,7 @@ void read_board(std::ifstream& fin) {
             }
         }
     }
-    scoring = statefunction(player, 0);
+    scoring = statefunction(player, 0, INT_MIN, INT_MAX);
 }
 
 void write_valid_spot(std::ofstream& fout) {
