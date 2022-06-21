@@ -6,7 +6,7 @@
 #include <vector>
 #include <set>
 #include <climits>
-
+//high winning chance baseline1
 using namespace std;
 enum SPOT_STATE {
     EMPTY = 0,
