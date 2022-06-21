@@ -7,7 +7,6 @@
 #include <set>
 #include <climits>
 
-//go_first win baseline1
 using namespace std;
 enum SPOT_STATE {
     EMPTY = 0,
@@ -244,10 +243,10 @@ int statefunction(int id, int depth){
     int final_score;
     if(id != player) final_score = INT_MAX;
     else final_score = INT_MIN;
-    if(depth == 2) return(calculate());
+    if(depth == 3) return(calculate());
     int flag;
     for(auto c: all){
-        for(int i = -4; i <= 4; i++){ //有時間再修正
+        for(int i = -2; i <= 2; i++){ //有時間再修正
             if(c.column+i >= 0 && c.column+i < 15) {
                 if(board[c.row][c.column+i] == 0) 
                     possible_new_me.insert(position(c.row, c.column+i));
