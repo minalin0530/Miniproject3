@@ -7,6 +7,7 @@
 #include <set>
 #include <climits>
 
+//go_first win baseline1
 using namespace std;
 enum SPOT_STATE {
     EMPTY = 0,
@@ -47,7 +48,6 @@ int calculate(void){
     int max_score = 0;
     int my_key[10] = {0}, opponent_key[10] = {0};
     int i, j;
-
     //horizontal
     for(auto c: row){
         for(i = 0; i < 15; i++){
@@ -64,7 +64,7 @@ int calculate(void){
                         if(board[c][i-1] != (3-player)) my_key[evaluate(j, 0)]++;}
                     else if(board[c][i-1] == 0 && board[c][i+j] == 0){
                         my_key[evaluate(j, 1)]++;}
-                    else if(board[c][i-1] != (3-player) || board[c][i+j] != (3-player)){
+                    else if(board[c][i-1] == 0 || board[c][i+j] == 0){
                         my_key[evaluate(j, 0)]++;}
                 }
                 i = i + j - 1;
@@ -76,14 +76,14 @@ int calculate(void){
                 }
                 if(j == 5) opponent_key[6]++;
                 else{
-                    if(i-1 < 0)
-                        if(board[c][i+j] != player) opponent_key[evaluate(j, 0)]++;
-                    else if(i+j >= 15)
-                        if(board[c][i-1] != player) opponent_key[evaluate(j, 0)]++;
+                    if(i-1 < 0){
+                        if(board[c][i+j] != player) opponent_key[evaluate(j, 0)]++;}
+                    else if(i+j >= 15){
+                        if(board[c][i-1] != player) opponent_key[evaluate(j, 0)]++;}
                     else if(board[c][i-1] == 0 && board[c][i+j] == 0){
                         opponent_key[evaluate(j, 1)]++;}
-                    else if(board[c][i-1] != player || board[c][i+j] != player)
-                        opponent_key[evaluate(j, 0)]++;
+                    else if(board[c][i-1] == 0 || board[c][i+j] == 0){
+                        opponent_key[evaluate(j, 0)]++;}
                 }
                 i = i + j - 1;
             }
@@ -99,14 +99,14 @@ int calculate(void){
                 }
                 if(j == 5)  my_key[6]++;
                 else{
-                    if(i-1 < 0)
-                        if(board[i+j][c] != (3-player)) my_key[evaluate(j, 0)]++;
-                    else if(i+j >= 15)
-                        if(board[i-1][c] != (3-player)) my_key[evaluate(j, 0)]++;
-                    else if(board[i-1][c] == 0 && board[i+j][c] == 0)
-                        my_key[evaluate(j, 1)]++;
-                    else if(board[i-1][c] != (3-player) || board[i+j][c] != (3-player))
-                        my_key[evaluate(j, 0)]++;
+                    if(i-1 < 0){
+                        if(board[i+j][c] != (3-player)) my_key[evaluate(j, 0)]++;}
+                    else if(i+j >= 15){
+                        if(board[i-1][c] != (3-player)) my_key[evaluate(j, 0)]++;}
+                    else if(board[i-1][c] == 0 && board[i+j][c] == 0){
+                        my_key[evaluate(j, 1)]++;}
+                    else if(board[i-1][c] == 0 || board[i+j][c] == 0){
+                        my_key[evaluate(j, 0)]++;}
                 }
                 i = i + j - 1;
             }
@@ -117,14 +117,14 @@ int calculate(void){
                 }
                 if(j == 5) opponent_key[6]++;
                 else{
-                    if(i-1 < 0)
-                        if(board[i+j][c] != player) opponent_key[evaluate(j, 0)]++;
-                    else if(i+j >= 15)
-                        if(board[i-1][c] != player) opponent_key[evaluate(j, 0)]++;
-                    else if(board[i-1][c] == 0 && board[i+j][c] == 0)
-                        opponent_key[evaluate(j, 1)]++;
-                    else if(board[i-1][c] != player || board[i+j][c] != player)
-                        opponent_key[evaluate(j, 0)]++;
+                    if(i-1 < 0){
+                        if(board[i+j][c] != player) opponent_key[evaluate(j, 0)]++;}
+                    else if(i+j >= 15){
+                        if(board[i-1][c] != player) opponent_key[evaluate(j, 0)]++;}
+                    else if(board[i-1][c] == 0 && board[i+j][c] == 0){
+                        opponent_key[evaluate(j, 1)]++;}
+                    else if(board[i-1][c] == 0 || board[i+j][c] == 0){
+                        opponent_key[evaluate(j, 0)]++;}
                 }
                 i = i + j - 1;
             }
@@ -143,18 +143,18 @@ int calculate(void){
                 }
                 if(j == 5) my_key[6]++;
                 else{
-                    if(i-1 < 0)
-                        if(board[i+j][c-i-j] != (3-player)) my_key[evaluate(j, 0)]++;
-                    else if(c-i+1 >= 15)
-                        if(board[i+j][c-i-j] != (3-player)) my_key[evaluate(j, 0)]++;
-                    else if(i+j >= 15)
-                        if(board[i-1][c-i+1] != (3-player)) my_key[evaluate(j, 0)]++;
-                    else if(c-i-j < 0)
-                        if(board[i-1][c-i+1] != (3-player)) my_key[evaluate(j, 0)]++;
-                    else if(board[i-1][c-i+1] == 0 && board[i+j][c-i-j] == 0)
-                        my_key[evaluate(j, 1)]++;
-                    else if(board[i-1][c-i+1] == 0 || board[i+j][c-i-j] == 0)
-                        my_key[evaluate(j, 0)]++;
+                    if(i-1 < 0){
+                        if(board[i+j][c-i-j] != (3-player)) my_key[evaluate(j, 0)]++;}
+                    else if(c-i+1 >= 15){
+                        if(board[i+j][c-i-j] != (3-player)) my_key[evaluate(j, 0)]++;}
+                    else if(i+j >= 15){
+                        if(board[i-1][c-i+1] != (3-player)) my_key[evaluate(j, 0)]++;}
+                    else if(c-i-j < 0){
+                        if(board[i-1][c-i+1] != (3-player)) my_key[evaluate(j, 0)]++;}
+                    else if(board[i-1][c-i+1] == 0 && board[i+j][c-i-j] == 0){
+                        my_key[evaluate(j, 1)]++;}
+                    else if(board[i-1][c-i+1] == 0 || board[i+j][c-i-j] == 0){
+                        my_key[evaluate(j, 0)]++;}
                 }
                 i = i + j - 1;
             }
@@ -208,7 +208,6 @@ int calculate(void){
                     else if(board[i-1][14-c+i-1] == 0 || board[i+j][14-c+i+j] == 0){
                         my_key[evaluate(j, 0)]++;}    
                 } 
-                i = i + j - 1;
             }
             else if(board[i][14-c+i] != 0){
                 for(j = 1; j <= 4; j++){
@@ -228,15 +227,14 @@ int calculate(void){
                         if(board[i+j][14-c+i+j] != player) opponent_key[evaluate(j, 0)]++;}
                     else if(board[i-1][14-c+i-1] == 0 && board[i+j][14-c+i+j] == 0){
                         opponent_key[evaluate(j, 1)]++;}  
-                    else if(board[i-1][14-c+i-1] == 0 || board[i+j][14-c+i-1] == 0){
+                    else if(board[i-1][14-c+i-1] == 0 || board[i+j][14-c+i+j] == 0){
                         opponent_key[evaluate(j, 0)]++;}    
                 }
-                i = i + j - 1;
             }
         }
     }
-    max_score = 10*my_key[0]+ 100*my_key[1] + 1000*my_key[2] + 3000*my_key[3] + 8000*my_key[4] + 50000*my_key[5] + 200000*my_key[6];
-    max_score -= (10*opponent_key[0] + 1000*opponent_key[1] + 1000*opponent_key[2]+ 50000*opponent_key[3]+10000*opponent_key[4] + 80000*opponent_key[5] + 100000*opponent_key[6]);  
+    max_score = 10*my_key[0]+ 100*my_key[1] + 1000*my_key[2] + 5000*my_key[3] + 8000*my_key[4] + 50000*my_key[5] + 200000*my_key[6];
+    max_score -= (10*opponent_key[0] + 1000*opponent_key[1] + 1000*opponent_key[2]+ 10000*opponent_key[3]+10000*opponent_key[4] + 50000*opponent_key[5] + 100000*opponent_key[6]);  
     //cout << my_key[0] << my_key[1] << my_key[2] << my_key[3] << my_key[4] << "  "  << opponent_key[0] << opponent_key[1] << opponent_key[2] << opponent_key[3] << opponent_key[4] << endl;
     return max_score;
 }
@@ -270,14 +268,13 @@ int statefunction(int id, int depth){
     }
     for(auto c: possible_new_me){
         all.push_back(c);
-        row.insert(c.row);
-        column.insert(c.column);
-        right_up.insert(c.row+c.column);
-        left_up.insert(14-(c.column-c.row));
-        //if(depth == 0)cout << c.row << " " << c.column << endl;
+        //row.insert(c.row);
+        //column.insert(c.column);
+        //right_up.insert(c.row+c.column);
+        //left_up.insert(14-(c.column-c.row));
         board[c.row][c.column] = id;
+        int here = statefunction(3-id, depth+1); 
         if(id != player) {
-            int here = statefunction(3-id, depth+1); 
             //cout << "2:: "<< c.row << " " << c.column << " " << here << endl;
             if(here < final_score){
                 final_score = here;
@@ -285,7 +282,6 @@ int statefunction(int id, int depth){
             }
         }
         else {
-            int here = statefunction(3-id, depth+1); 
             //cout << c.row << " " << c.column << " " << here << endl;
             if(here >= final_score){
                 final_score = here;
