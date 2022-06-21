@@ -31,7 +31,6 @@ struct cmp{
 };
 
 vector<position> all;
-int position_score[15][15];
 position max_position(7, 7);
 set<int> row, column, left_up, right_up;
 
